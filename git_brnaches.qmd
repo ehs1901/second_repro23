@@ -1,6 +1,6 @@
 ---
 title: "git_branches"
-format: html
+format: docx
 editor: visual
 ---
 

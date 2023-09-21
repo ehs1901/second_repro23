@@ -1,0 +1,24 @@
+---
+title: "git_branches"
+format: html
+editor: visual
+---
+
+## Quarto
+
+Quarto enables you to weave together content and executable code into a finished document.
+To learn more about Quarto see <https://quarto.org>.
+
+## Litteratur 
+
+At arrangement- og eventbransjen sliter har ringvirkninger.
+Dette påvirker bransjer som artister, catering, lyd, lys, teknikk, scene, foredragsholdere, lokalutleie med flere.
+Eventbyråene har ikke bare selv mange ansatte, men holder også liv i mange andre bransjer.
+
+*Fra den 9. til 14. mars i år gikk hele vår industri med flere tusen ansatte, et nettverk av samarbeidspartnere, leverandører, hoteller, catering og et udefinert antall frilansere fra en relativt forutsigbar hverdag til bråstans.* Kristian Kirkvaag til.
+Kirkvaag er kreativ leder i Gyro AS og styremedlem i Sponsor- og Eventforeningen.
+
+Å være innovativ betyr mye mer enn bare å (live)streame et arrangement, som innsiktene i forrige kapittel fremhevet.
+Disse organisasjonene lyktes ved kontinuerlig å fremme innovative miljøer før utbruddet av COVID-19, ved å være verdidrevne og kundesentrerte.
+Det er derfor forståelig at digitale teknologier ikke ble brukt som en midlertidig løsning, men heller som midler til å forbedre opplevelsesplattformer for arrangementdeltakere og dessuten som en måte å utvide et arrangements forretningspotensiale.
+Like viktig har bruken av (nye) digitale teknologier tillatt disse arrangementorganisasjonene å radikalt omdefinere den tradisjonelle oppfatningen av et arrangementssted, og kastet nytt lys på arrangementlokaler og typer.

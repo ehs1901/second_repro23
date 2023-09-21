@@ -1,0 +1,307 @@
+---
+title: "NYCflight13"
+format: html
+editor: visual
+language: nb.yaml
+---
+
+## Data Transformation
+
+### Flights that departed NYC in 2013 - DataFrame
+
+```{r}
+#| label: setup 
+#| output: false
+#| message: false
+library(tidyverse)
+library(nycflights13)
+```
+
+```{r}
+flights <- flights
+```
+
+Denne funksjonen viser oss hvor mange rekke (observasjoner) og hvor mange kolonner (variabler) vi har i datasettet:
+
+```{r}
+dim(flights)
+```
+
+Her kan vi spør om hva noe er.
+Her ser vi at det er en dataframe med utvidet funksjonalitet med en tibble:
+
+```{r}
+# what type; data.frame, tibble?
+class(flights)
+```
+
+### Bli kjent med datasettet - Head og Tail
+
+Ofte det vi starter med er å se litt på starten (head) og slutten (tail) av filen for å få litt oversikt over hvordan ting ser ut:
+
+-   Her blir det skrevet ut de 10 første varablene
+
+```{r}
+# vi legger alltid inn "paged.print: false"  for å skrive det ut i "console" 
+#| paged.print: false
+flights |> 
+  head(n = 10)
+```
+
+-   Jeg vil se de 15 siste variablene:
+-   Her klartr vi ikke å bruke "tail" funksjonen, derfor måtte vi bruke "arrange". Det kan se ut som at datoene ikke er sortert etter mnd og dag.
+
+```{r}
+#| paged.print: false
+flights |> 
+  arrange(desc(month), (desc(day)))
+```
+
+### **Se på en delmengde - Filter**
+
+for eksempel se på kun en dag.
+I utgangspunktet starter vi med å se nærmere på 1.januar.
+Bruker "print" komondo sånn det blir finere kode i chunken:
+
+-   filtrer ut -\> jeg vil kun ha med videre "1.januar.2013"
+-   print ut de dataene og ta med kun de første 5 rekkene.
+-   Legge til vidde for å få plass til alt.
+
+```{r}
+#| paged.print: false
+flights |> 
+  filter(month == 1, day == 1) |> 
+print(
+   n = 5,
+  width = 70
+  )
+```
+
+Om jeg ønsker å se på flere dager i januar, for eksempel 1.
+, 15.
+og 30.
+:
+
+-   %in% er en nyttig funksjon
+
+```{r}
+print(
+  filter(flights, month == 1, day %in% c(1, 15, 30)),
+  n = 5,
+  width = 70
+  )
+```
+
+Om jeg vil se på alle dagene **utenom** 1.
+, 15.
+og 30.
+januar :
+
+-   så ved å bruke ! betyr det altså "ikke ta med". Her betyr det da "ikke ta med dag 1, 15 og 30 i januar"
+
+```{r}
+  flights %>% 
+  filter(month == 1, !(day %in% c(1, 15, 30))) %>% 
+  print(width = 70)
+```
+
+En annen klassisk komando er **"summary"** .
+Den tar for seg hver av de 19 variablene og gir oss et type sammendrag av hver variabel:
+
+```{r}
+summary(flights)
+```
+
+## Oppgaver - Filter
+
+1.  **How many flights were there in April and September (total)?**
+
+    ```{r}
+    #| paged.print: false
+    flights |> 
+      filter(month %in% c(4, 9)) |> 
+    # kan også legge inn "nrow" for å få bare svaret
+    nrow()
+    ```
+
+    kan også bruke denne metoden:
+
+    -   Her får vi ut alle antall flyvninger per måned.
+
+    ```{r}
+    #| paged.print: false
+    flights |> 
+      group_by(month) |> 
+      summarise(antall_flyvninger = n())
+    ```
+
+2.  **How many flights were there in total the first two days of a month?**
+
+    ```{r}
+    #| paged.print: false
+    flights |> 
+      filter(month == 1) |> 
+      group_by(day) |> 
+      count() |> 
+      #count teller opp antallet i en gruppe
+      print(n = 2)
+    ```
+
+    Denne viser hvor mange flyvninger som skjer de to første dagene hver måned i hele 2013??
+
+    ```{r}
+    #| paged.print: false
+    flights |> 
+      filter(day %in% c(1, 2)) |> 
+      nrow()
+    ```
+
+    Her ser vi hvilke dager som har mest flyvninger.
+    Her er svaret 2.januar som hadde 943 flyvninger.
+
+    ```{r}
+    #| paged.print: false
+    flights |> 
+      filter(month == 1) |> 
+      group_by(day) |> 
+      count() |>
+      arrange(desc(n)) |> 
+      print(n = 1)
+    ```
+
+3.  **How may flights were there during 2013 that had an arrival delay greater than or equal to 15 min., but less than 30 min.?**
+
+    -   hvor mange flyvninger det var i 2013 som hadde en ankomstforsinkelse på **15 minutter eller mer**
+
+        **( \>=15)**, men **mindre enn 30 minutter (\<30):**
+
+    ```{r}
+    #| paged.print: false
+    flights |> 
+      filter(arr_delay >= 15, arr_delay < 30) |> 
+      nrow()
+    ```
+
+## NA verdi
+
+**Dette handler om at det mangler en observersjon i vektoren. Kan bety "not available"**.
+Regel med NA er at hvis man har 1stk NA blir svaret NA.
+
+Plukke ut "arr_delay" -\> da bruker vi "\$" for å plukke ut variabelen
+
+-   Jeg ønsker å finne ut hvor mange **NA verdier** det er.
+
+-   Husk: True = 1 og False = 0
+
+    = Det er totalt 9430 NA verdier i variabelen *som da er true, fordi false er null og vil derfor ikke vises.*
+
+```{r}
+sum(is.na(flights$arr_delay))
+```
+
+## Select komandoen
+
+Ta vekk "year" variablene for den er unødvendig å ha med da alt skjer i 2013.
+Overskriv "flights" med den nye versjonen som ikke har med "year"
+
+```{r}
+# Dropper variabelen "year" 
+flights <- flights |> 
+  select(-year)
+```
+
+Nå vil jeg endre rekkefølge på variablene slik jeg kan sette øverst det jeg syns er mest interessant og så spessifisere jeg resten av rekken og til slutt hiver jeg på en "everything" for å liste opp resten jeg ikke nevnte i parantesen.
+
+```{r}
+flights <- flights |> 
+  select(month:day, carrier, tailnum, everything())
+```
+
+Endre navn på en variabel inne i select komandoen:
+
+```{r}
+# Henter inn den gamle flights datasette som det ikke er blitt gjort noen endringer på: 
+flights <- nycflights13::flights
+```
+
+Her har jeg **først droppet variablene** year da den er unødvendig å ha med da alt skjer i 2013.
+Videre har jeg **endret rekkefølgen på variablene**, samtidig som jeg har **endret to stk variabelnavn til norsk.**
+
+```{r}
+flights <- flights |> 
+  select(-year) |> 
+  select(
+    month:day, 
+    flyselskap = carrier, 
+    halenummer = tailnum,
+    everything()
+  )
+# Kan også bruke "rename" funksjonen for å endre navn på variablene  
+```
+
+Lage et nytt lite datasett med kunn dag, måned (mai) og arr_delay:
+
+```{r}
+my_vars <- flights |> 
+  select(day, month, arr_delay) |> 
+  filter(month == 5) 
+  # Her er det jo egentlig unødvendig å ha med måned 5 (mai) da denne variablene vil stå likt hele veien, så kan derfor legge inn "select(-month) for å fjerne denne. 
+```
+
+**Oppgave:** Gjennomsnittlig ankomstforsinkelse de ulike dagene i Mai?
+
+```{r}
+#| paged.print: false
+#Gjennomsnittlig ankomstforsinkelse i desimalmunitt for dagene i Mai 2013
+my_vars |> 
+  group_by(day) |> 
+  summarise(gjennomsnittlig_forsinkelse = mean(
+    arr_delay,
+    na.rm = TRUE)
+    ) |> 
+  print(n = 31)
+```
+
+## Lage en ny vaiabel - Mutate
+
+**"ends_with" -\>** Bruker den til å velge ut/plukke ut variabler som slutter med (...).
+Her plukker den ut 2 variabler som slutter på "delay" som i dette tilfellet er "*dep_delay"* og *"arr_delay"*
+
+Her får vi ut en ny versjon av datasette.
+Det har kommet en ny variabel "**gain**" og **"speed"**.
+
+-   **Gain** - Hvor mye tid man har spart inne på flyplassen. Differeansen mellom avgansforsinkelse minus hvor mye det var forsinket når det kom inn. Dette er en ny variabel man har regnet ut ved hjelp av to eksisterende varaibler
+-   **Speed** - distansen delt på airtime. ganger med 60 for å få det omgjort til per. time. Altså hastighet pr time.
+
+Her bruker vi %\>% som pipe.
+
+arrange(gain) -\> for å få dataene økende
+
+```{r}
+flights <- flights %>%
+  select(month:day, ends_with("delay"), distance, air_time) %>%
+  mutate(
+    gain = dep_delay - arr_delay,
+    speed = (distance/air_time) * 60
+    ) %>%
+  select(month:day, gain, everything()) %>%
+  arrange(gain) 
+head(flights, n = 5) 
+```
+
+## Transmute
+
+Tar kun vare på den nye variabelen man lager, og dropper alle andre variabler.
+
+Her vil kun "gain" og "speed" være det som kommer ut her videre i pipen.
+Alle andre variabler fra datasette er kastet vekk.
+
+```{r}
+my_data <- flights %>%
+    transmute(
+    gain = dep_delay - arr_delay,
+    speed = (distance/air_time) * 60
+    ) %>%
+  arrange(gain)
+head(my_data, n = 3)
+```

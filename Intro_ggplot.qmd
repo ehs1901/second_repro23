@@ -1,0 +1,305 @@
+---
+title: "ggplot"
+format: html
+editor: visual
+---
+
+```{r}
+#| label: setup
+#| echo: false
+#| output: false
+#| message: false
+library(tidyverse)
+library(nycflights13)
+library(readxl)
+library(readr)
+library(PxWebApiData)
+```
+
+## Intro ggplot
+
+```{r}
+ggplot(
+  data = mtcars, 
+  mapping = aes(x = disp, y = mpg)
+  ) +
+  geom_point() + 
+  geom_smooth()
+```
+
+```{r}
+ggplot(
+  data = mtcars,
+  mapping = aes(x = disp, y = mpg, 
+                colour = factor(am), 
+                alpha = wt,
+                shape = factor(cyl), 
+                size = qsec, 
+                ))+ 
+  geom_point()
+```
+
+```{r}
+ggplot() +
+  geom_point(data = mtcars,
+             mapping = aes(x = disp, y = mpg, colour = factor(cyl), alpha = 3.6*(0.25*1609.347)/qsec,
+                           shape = factor(ifelse(am, "Man", "Aut"))), size=4) +
+  labs(colour = "cyl", alpha = "speed\n(km/h)", shape = "trans-\nmission")
+```
+
+```{r}
+gg2 <- ggplot() +
+  geom_point(
+    data = mtcars,
+    mapping = aes(
+      x = disp,
+      y = mpg, 
+      colour = factor(cyl), 
+      size = 3.6*(0.25*1609.347)/qsec, 
+      shape = factor(
+        # Note codeing am
+        # 0 automatic, 1 manual
+        ifelse(
+          am, 
+          "Aut", 
+          "Man"
+          )
+        )
+      )
+    ) +
+  labs(
+    colour = "cyl", 
+    size = "speed\n(km/h)", 
+    shape = "trans-\nmission"
+    ) 
+
+```
+
+```{r}
+gg2 + 
+  geom_smooth(
+    data = mtcars, 
+    mapping = aes(x = disp, y = mpg), 
+    level = 0.99
+    ) + 
+  geom_smooth(
+    data = mtcars, 
+    mapping = aes(x = disp, y = mpg), 
+    level = 0.95
+  ) + 
+  geom_smooth(
+    data = mtcars, 
+    mapping = aes(x = disp, y = mpg),
+    method = lm,
+    se = FALSE,
+    colour = "red"
+  )
+```
+
+```{r}
+ggplot(
+  data = mtcars, 
+  mapping = aes(
+    x = disp, 
+    y = mpg
+    )
+  ) +
+  geom_point() +
+  geom_smooth(
+    method = "lm", 
+    se = FALSE
+    ) +
+  # robust lm
+  geom_smooth(
+    method = MASS::rlm, 
+    colour = 'Red', 
+    se = FALSE
+    )
+```
+
+```{r}
+ggplot(
+  data = mtcars, 
+  mapping = aes(
+    x = hp, 
+    y = 1609.347/(2*qsec^2)
+    )
+  ) +
+  facet_wrap(~cut_number(wt, n =3)) +
+  geom_point(
+    aes(colour = cut_number(
+      wt, 
+      n = 3)
+      )
+    ) +
+  geom_smooth(
+    mapping = aes(colour = cut_number(
+      wt, 
+      n = 3)
+      ),
+    method = "lm", 
+    se = FALSE
+    )
+```
+
+```{r}
+#new dataframe to use for the grey points
+hp_acc <- data.frame(
+  hp = mtcars$hp, 
+  acc = 1609.347/(2*mtcars$qsec^2)
+  )
+
+ggplot(
+  data = mtcars, 
+  mapping = aes(x = hp, y = 1609.347/(2*qsec^2))
+  ) +
+  geom_point(
+    data = hp_acc, 
+    mapping = aes(x = hp, y = acc), colour = "grey80"
+    ) +
+  facet_wrap(
+    ~cut_number(
+      wt, 
+      n =3 , 
+      labels = c("Light", "Medium", "Heavy")
+      )
+    ) +
+  geom_point(
+    mapping = aes(colour = cut_number(
+      wt, 
+      n = 3, 
+      labels = c("Light", "Medium", "Heavy")
+      )
+      ),
+    show.legend = TRUE
+    ) +
+  geom_smooth(
+    method = "lm", 
+    se = FALSE
+    ) +
+  labs(
+    y = "Mean acceleration (m/s^2)", 
+    colour = "Weight"
+    )
+```
+
+```{r}
+ggplot(
+  data = mtcars, 
+  mapping = aes(x = hp, y = 1609.347/(2*qsec^2))
+  ) +
+  geom_point(
+    data = hp_acc, 
+    mapping = aes(x = hp, y = acc), 
+    colour = "grey80"
+    ) +
+  facet_grid(
+    factor(cyl)~cut_number(
+      wt, 
+      n =3 , 
+      labels = c("Light", "Medium", "Heavy"))
+    ) +
+  geom_point(
+    mapping = aes(
+      colour = cut_number(
+        wt, 
+        n = 3, 
+        labels = c("Light", "Medium", "Heavy")
+        )
+      ),
+    show.legend = FALSE
+    ) +
+  geom_smooth(
+    method = "lm", 
+    se = FALSE
+    ) +
+  labs(
+    y = "Mean acceleration", 
+    colour = "Weight"
+    )
+```
+
+```{r}
+datasett <- read_excel("nyfil.xlsx", skip = 2)
+
+
+```
+
+```{r}
+datasett
+```
+
+```{r}
+X10540_20230908_114104 <- read_delim("10540_20230908-114104.csv", 
+    delim = ";", escape_double = FALSE, locale = locale(date_names = "nb", 
+        encoding = "ISO-8859-1"), trim_ws = TRUE, 
+    skip = 1, 
+    show_col_types = FALSE)
+
+```
+
+```{r}
+X10540_20230908_114104 
+
+```
+
+```{r}
+summary(X10540_20230908_114104)
+```
+
+## PxWebApiData
+
+```{r}
+metadata_10540_norsk <- ApiData(
+  "https://data.ssb.no/api/v0/no/table/10540/",
+  returnMetaFrames = TRUE
+  )
+```
+
+```{r}
+unemp99to02 <- ApiData12(
+  "http://data.ssb.no/api/v0/en/table/10540",
+  # Have not been able to specify more complex regions
+  Region = list("11*"),
+  Tid = c(paste(
+    rep(1999:2002, each = 12), 
+    "M",
+    sprintf("%02d", 1:12), 
+    sep = "") 
+  )
+) 
+   
+ 
+```
+
+```{r}
+paste(
+    rep(1999:2002, each = 12), 
+    "M",
+    sprintf("%02d", 1:12), 
+    sep = "") 
+```
+
+```{r}
+set.seed(1234)
+res_mean_rnorm_3dig_string <-
+  rnorm(n = 10, mean = 0, sd = 1) %>%
+  mean() %>%
+  round(digits = 3) %>%
+  # The dot '.' is to show where the content of the pipe should be put
+  paste("Result:")
+res_mean_rnorm_3dig_string
+```
+
+```{r}
+set.seed(1234)
+rnorm(
+  n = 10,
+  mean = 0,
+  sd = 1
+) %>%
+  mean() %>%
+  round(digits = 3) %>% 
+  paste("Result:", .) -> res_mean_rnorm_3dig_string
+res_mean_rnorm_3dig_string
+```

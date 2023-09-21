@@ -1,0 +1,19 @@
+---
+title: "Git_branches"
+format: html
+editor: visual
+---
+
+## Introduksjon 
+
+skriver litt tekst.
+jadi jadi
+
+Under og i tiden rett etter koronapandemien har mange eventarrangører gjort endringer i måten de kommuniserer og legger til rette sine arrangementer på.
+Et eksempel er Trøndersk Matfestival, som har endret sin billedkommunikasjon:
+
+For å unngå å fremstå som uansvarlige, har de vært nøye med at bildene de viser, ikke inneholder store menneskemengder.^[1](https://www.idunn.no/doi/full/10.18261/9788215054599-23-06#ch6-fn1)^ Et annet eksempel er Øyafestivalen, som ga refusjonsgaranti for 2021-festivalen.^[2](https://www.idunn.no/doi/full/10.18261/9788215054599-23-06#ch6-fn2)^
+
+## Litteratur 
+
+Analyse

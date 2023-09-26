@@ -1,0 +1,250 @@
+---
+title: "EDA"
+format: pdf
+editor: visual
+---
+
+```{r}
+#| label: setup
+#| output: false
+#| message: false
+#| echo: false
+library(tidyverse)
+library(nycflights13)
+library(gridExtra)
+library(modelr)
+library(grid)
+library(ggplotify)
+library(vtable)
+```
+
+## Se på variabler:
+
+```{r}
+heights <- modelr::heights
+```
+
+```{r}
+heights |> 
+  select(income, height) |>
+  filter(income < 300000) |> 
+  ggplot(mapping = aes(x = height, y = income)) +
+  geom_point() +
+  geom_smooth(method = "lm")
+```
+
+```{r}
+summary(heights)
+```
+
+## NA i heights:
+
+```{r}
+# NAs in heights?
+heights %>% 
+  apply(MARGIN = 2, FUN = is.na) %>% 
+  apply(MARGIN = 2, FUN = sum) 
+```
+
+Får akkurat samme svar ved å bruke komandoen:
+
+```{r}
+# NAs in heights?
+heights %>% 
+  is.na() %>% 
+  apply(MARGIN = 2, FUN = sum) 
+```
+
+Her får vi bare opp de variablene som faktisk har NA verdier.
+
+-   Punktum betyr her dataene i pipen. Legger det inn i firkanklammer for å gi beskjed om hvilke verdier jeg vil ha med fra dataframen.
+
+```{r}
+# number of NAs in each variable
+# drop variables with no NA
+heights %>% 
+  is.na() %>% 
+  colSums() %>% 
+  .[. > 0]
+```
+
+## Vtable - pakke
+
+### Summary Statistics
+
+Her tar vi ikke med variablene "marital og sex"
+
+-   St gir oss tabellen i viewer
+
+```{r}
+# package vtable must be installed
+heights %>% 
+  select(-marital, -sex) %>% 
+  vtable::st()
+```
+
+Her får vi bare opp variablene "marital og sex"
+
+```{r}
+# package vtable must be installed
+heights %>% 
+  select(marital, sex) %>% 
+  vtable::st(.)
+```
+
+**Så ønsker vi å se litt nærmere på sivilstatus (marital):**
+
+1.  Først dropper vi sivilstatus og lager en tabell som blir fordelt mellom menn og kvinner:
+
+```{r}
+heights %>% 
+  select(-marital) %>% 
+  vtable::st(group = 'sex')
+```
+
+Her gjør vi en liten bearbeidelse i sivilstatus varaiabelen.
+Marital inneholdt 5 ulike kategorier -\> gift, ugift, skilt, enke og separert.
+
+Lager en ny variabel som heter gift, og skille denne på - **gift eller ikke gift**.
+Vi går fra å ha 5 kategorier til å bruke true og false til å svare på om du er gift eller ikke.
+
+Siden vi lager oss en ny variabel "married" bruker vi komandoen "mutate"
+
+Videre vil jeg bare se på **kvinnene**, og derfor dropper jeg variabelen "sex".
+
+```{r}
+# package vtable must be installed
+heights %>% 
+  mutate(
+    married = if_else(
+    marital == 'married', 
+    TRUE,
+    FALSE
+    )
+  ) %>% 
+  filter(sex == 'female') %>% 
+  select(-sex, -marital) %>% 
+  vtable::st(group = 'married')
+```
+
+Så vil vi se på **mennene**:
+
+```{r}
+# package vtable must be installed
+heights %>% 
+  mutate(
+    married = if_else(
+    marital == 'married', 
+    TRUE,
+    FALSE
+    )
+  ) %>% 
+  filter(sex == 'male') %>% 
+  select(-sex, -marital) %>% 
+  vtable::st(group = 'married')
+```
+
+## Grafisk greie på en variabel
+
+```{r}
+ggplot(data = heights) +
+  geom_bar(mapping = aes(x = education), na.rm = TRUE)
+```
+
+```{r}
+hist1 <- ggplotify::as.ggplot(~hist(heights$income, breaks = 20))
+hist2 <- ggplot(heights, mapping = aes(x = income)) +
+  geom_histogram(bins = 20)
+
+gridExtra::grid.arrange(hist1, hist2, ncol = 2)
+```
+
+Her bruker vi log (logaritme)
+
+```{r}
+hist1 <- ggplotify::as.ggplot(~hist(log(heights$income + 1), breaks = 20))
+hist2 <- ggplot(heights, mapping = aes(x = log(income + 1)))+
+  geom_histogram(bins = 20)
+
+gridExtra::grid.arrange(hist1, hist2, ncol = 2)
+```
+
+Generere tre ulike historgram for tre ulike variabler -\> income, height og weight
+
+```{r}
+hist3 <- ggplot(heights, mapping = aes(x = income)) +
+  geom_histogram(bins = 40, na.rm = TRUE)
+hist4 <- ggplot(heights, mapping = aes(x = height)) +
+  geom_histogram(bins = 40, na.rm = TRUE)
+hist5 <- ggplot(heights, mapping = aes(x = weight)) +
+  geom_histogram(bins = 40, na.rm = TRUE)
+gridExtra::grid.arrange(hist3, hist4, hist5, nrow = 1)
+```
+
+```{r}
+hist6 <- ggplot(heights, mapping = aes(x = age)) +
+  geom_histogram(bins = 40, na.rm = TRUE)
+hist7 <- ggplot(heights, mapping = aes(x = education)) +
+  geom_histogram(bins = 40, na.rm = TRUE)
+hist8 <- ggplot(heights, mapping = aes(x = afqt)) +
+  geom_histogram(bins = 40, na.rm = TRUE)
+gridExtra::grid.arrange(hist6, hist7, hist8, nrow = 1)
+```
+
+## `geom_density()`
+
+Disse kurvene er greit å bruke til å se på forskjeller i datasette.
+Man kan også bruke historgram men disse density kurvene er bedre.
+
+Denne viser de som **ikke** har fullført HS(high school", de som ikke har fulført TC osv...
+
+```{r}
+heights %>% 
+  mutate(
+    edu_fac = cut(education, 
+                  breaks = c(0, 12, 14, 16, 21), 
+                  labels = c("NotHS", "NotTC", "NotC", "C+"),
+                  right = FALSE) 
+  ) %>% 
+  filter(!is.na(edu_fac) & income > 0) %>%
+  ggplot(mapping = aes(x = income, fill = edu_fac, colour = edu_fac)) +
+  geom_density(alpha = 0.2, na.rm = TRUE) + 
+  facet_wrap(~sex)
+```
+
+```{r}
+heights %>% 
+  mutate(
+    edu_fac = cut(education, 
+                  breaks = c(0, 12, 14, 16, 21), 
+                  labels = c("NotHS", "NotTC", "NotC", "C+"),
+                  right = FALSE) 
+  ) %>% 
+  filter(!is.na(edu_fac) & income > 0  & income < 250000) %>%
+  ggplot(mapping = aes(x = income, fill = edu_fac, colour = edu_fac)) +
+  geom_density(alpha = 0.2, na.rm = TRUE) + 
+  facet_wrap(~sex)
+
+```
+
+Her er de samme dataene illustrert på en annen måte.
+Her er de illustrert ved hjelp av 4 plott men med to density - en for menn og en for kvinner:
+
+```{r}
+heights %>% 
+  mutate(
+    edu_fac = cut(education, 
+                  breaks = c(0, 12, 14, 16, 21), 
+                  labels = c("NotHS", "NotTC", "NotC", "C+"),
+                  right = FALSE) 
+  ) %>% 
+  filter(!is.na(edu_fac) & income > 0) %>%
+  ggplot(mapping = aes(x = income, fill = sex, colour = sex)) +
+  geom_density(alpha = 0.2, na.rm = TRUE) + 
+  facet_wrap(~edu_fac)
+```
+
+```{r}
+#| echo: false
+# siste
+```
